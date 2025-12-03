@@ -11,7 +11,9 @@ from .views import (
     PasswordChangeView,
     AvatarUploadView,
     UserDeleteView,
-    LogoutView
+    LogoutView,
+    APIKeyListCreateView,
+    APIKeyDetailView
 )
 
 app_name = 'users'
@@ -28,4 +30,8 @@ urlpatterns = [
     path('me/password/', PasswordChangeView.as_view(), name='password_change'),
     path('me/avatar/', AvatarUploadView.as_view(), name='avatar_upload'),
     path('me/delete/', UserDeleteView.as_view(), name='delete_account'),
+
+    # API Keys (Public Tokens)
+    path('api-keys/', APIKeyListCreateView.as_view(), name='api_keys'),
+    path('api-keys/<int:pk>/', APIKeyDetailView.as_view(), name='api_key_detail'),
 ]

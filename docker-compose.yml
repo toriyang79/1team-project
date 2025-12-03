@@ -1,49 +1,62 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   db:
     image: postgres:16-alpine
     container_name: media_platform_db
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: media_platform
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME:-media_platform}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - media_platform_network
 
+  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: media_platform_redis
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - media_platform_network
 
+  # Django Web Application
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: media_platform_web
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
+    restart: unless-stopped
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-    ports:
-      - "8000:8000"
+      - ./logs:/app/logs
+    expose:
+      - "8000"
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_HOST=db
+      - DB_PORT=5432
     env_file:
       - .env
     depends_on:
@@ -51,31 +64,79 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - media_platform_network
 
-  celery_worker:
-    build: .
-    container_name: media_platform_celery_worker
-    command: celery -A config worker -l info
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: media_platform_nginx
+    restart: unless-stopped
     volumes:
-      - .:/app
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    networks:
+      - media_platform_network
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: media_platform_celery_worker
+    restart: unless-stopped
+    command: celery -A config worker -l info --concurrency=2
+    volumes:
       - media_volume:/app/media
+      - ./logs:/app/logs
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_HOST=db
+      - DB_PORT=5432
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - media_platform_network
 
+  # Celery Beat (Scheduler)
   celery_beat:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: media_platform_celery_beat
+    restart: unless-stopped
     command: celery -A config beat -l info
     volumes:
-      - .:/app
+      - ./logs:/app/logs
+    environment:
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_HOST=db
+      - DB_PORT=5432
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - media_platform_network
+
+networks:
+  media_platform_network:
+    driver: bridge
 
 volumes:
   postgres_data:

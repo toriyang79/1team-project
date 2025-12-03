@@ -213,3 +213,83 @@ class LogoutView(APIView):
             return Response({
                 'error': '잘못된 토큰입니다.'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# API Key Management Views
+
+class APIKeyListCreateView(generics.ListCreateAPIView):
+    """
+    List all API keys or create a new one
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            from .serializers import APIKeyCreateSerializer
+            return APIKeyCreateSerializer
+        from .serializers import APIKeySerializer
+        return APIKeySerializer
+
+    def get_queryset(self):
+        from .models import APIKey
+        return APIKey.objects.filter(user=self.request.user)
+
+    @extend_schema(
+        summary="API Key 목록 조회",
+        description="사용자의 모든 API Key를 조회합니다.",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="API Key 생성",
+        description="새로운 API Key (Public Token)를 생성합니다.",
+    )
+    def post(self, request, *args, **kwargs):
+        from .serializers import APIKeySerializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        api_key = serializer.save(user=request.user)
+
+        # Return full key only once (on creation)
+        response_serializer = APIKeySerializer(api_key)
+        return Response({
+            'api_key': response_serializer.data,
+            'message': 'API Key가 생성되었습니다. 이 키는 다시 확인할 수 없으니 안전한 곳에 보관하세요.'
+        }, status=status.HTTP_201_CREATED)
+
+
+class APIKeyDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete an API key
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        from .serializers import APIKeySerializer
+        return APIKeySerializer
+
+    def get_queryset(self):
+        from .models import APIKey
+        return APIKey.objects.filter(user=self.request.user)
+
+    @extend_schema(
+        summary="API Key 조회",
+        description="특정 API Key의 정보를 조회합니다 (key 값은 마스킹됨).",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="API Key 수정",
+        description="API Key의 설정을 수정합니다.",
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="API Key 삭제",
+        description="API Key를 삭제합니다.",
+    )
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)

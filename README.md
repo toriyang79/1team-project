@@ -116,47 +116,171 @@
 
 ### 방법 1: Docker를 사용한 실행 (권장)
 
-1. **저장소 클론**
+Docker Compose를 사용하면 Django, PostgreSQL, Redis, Nginx, Celery를 한 번에 실행할 수 있습니다.
+
+#### 1.1 저장소 클론
 ```bash
 git clone <repository-url>
 cd 1team-project
 ```
 
-2. **환경변수 설정**
+#### 1.2 환경변수 설정
 ```bash
-cp .env.example .env
+# Docker 전용 환경변수 파일 복사
+cp .env.docker .env
+
 # .env 파일을 열어 필요한 값들을 수정하세요
+# 특히 SECRET_KEY와 DB_PASSWORD는 반드시 변경하세요!
+nano .env  # 또는 vim, vi 등 사용
 ```
 
-3. **Docker Compose로 실행**
+**중요 설정 항목:**
+- `SECRET_KEY`: Django 시크릿 키 (보안을 위해 반드시 변경)
+- `DEBUG`: 프로덕션에서는 `False`로 설정
+- `ALLOWED_HOSTS`: 실제 도메인 또는 IP 주소 추가
+- `DB_PASSWORD`: PostgreSQL 비밀번호 (강력한 비밀번호로 변경)
+- `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD`: 자동 관리자 계정 생성 (선택사항)
+
+#### 1.3 Docker Compose로 전체 스택 실행
 ```bash
-# 빌드 및 실행
+# 모든 서비스 빌드 및 백그라운드 실행
 docker-compose up -d --build
 
-# 마이그레이션 실행 (최초 1회)
+# 실행 상태 확인
+docker-compose ps
+
+# 로그 확인 (실시간)
+docker-compose logs -f
+
+# 특정 서비스 로그만 확인
+docker-compose logs -f web
+docker-compose logs -f nginx
+```
+
+**실행되는 서비스:**
+- `db`: PostgreSQL 16 데이터베이스
+- `redis`: Redis 7 캐시 서버
+- `web`: Django 애플리케이션 (Gunicorn)
+- `nginx`: Nginx 리버스 프록시
+- `celery_worker`: Celery 워커 (비동기 작업)
+- `celery_beat`: Celery Beat (스케줄러)
+
+#### 1.4 서비스 접속
+- **대시보드**: http://localhost (Nginx를 통해 접속)
+- **API**: http://localhost/api/v1/
+- **API 문서 (Swagger)**: http://localhost/api/docs/
+- **API 문서 (Redoc)**: http://localhost/api/redoc/
+- **Admin**: http://localhost/admin/
+
+**포트 정보:**
+- Nginx: 80 (HTTP), 443 (HTTPS - SSL 설정 시)
+- Django (직접 접속): 8000 (내부 포트, 외부 노출 안 됨)
+- PostgreSQL: 5432
+- Redis: 6379
+
+#### 1.5 유용한 Docker 명령어
+```bash
+# 컨테이너 접속 (Django 쉘)
+docker-compose exec web python manage.py shell
+
+# 데이터베이스 마이그레이션
 docker-compose exec web python manage.py migrate
 
-# 슈퍼유저 생성
+# 정적 파일 수집
+docker-compose exec web python manage.py collectstatic --noinput
+
+# 슈퍼유저 생성 (수동)
 docker-compose exec web python manage.py createsuperuser
 
-# 로그 확인
-docker-compose logs -f web
-```
+# 컨테이너 내부 Bash 접속
+docker-compose exec web bash
 
-4. **서비스 접속**
-- API: http://localhost:8000
-- API 문서 (Swagger): http://localhost:8000/api/docs/
-- API 문서 (Redoc): http://localhost:8000/api/redoc/
-- Admin: http://localhost:8000/admin/
+# 서비스 재시작
+docker-compose restart web
 
-5. **Docker 중지 및 삭제**
-```bash
-# 중지
+# 특정 서비스만 재빌드
+docker-compose up -d --build web
+
+# 모든 서비스 중지
+docker-compose stop
+
+# 서비스 중지 및 컨테이너 삭제
 docker-compose down
 
-# 볼륨까지 삭제
+# 볼륨까지 완전 삭제 (데이터베이스 데이터 포함)
 docker-compose down -v
+
+# 사용하지 않는 이미지 정리
+docker system prune -a
 ```
+
+#### 1.6 프로덕션 배포 시 추가 설정
+
+**SSL/HTTPS 설정 (Let's Encrypt):**
+```bash
+# Certbot 컨테이너를 사용한 SSL 인증서 발급
+docker run -it --rm \
+  -v /etc/letsencrypt:/etc/letsencrypt \
+  -v /var/www/certbot:/var/www/certbot \
+  certbot/certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d your-domain.com \
+  -d www.your-domain.com
+```
+
+**보안 설정 체크리스트:**
+- [ ] `DEBUG=False` 설정
+- [ ] `SECRET_KEY` 강력한 값으로 변경
+- [ ] `ALLOWED_HOSTS`에 실제 도메인 추가
+- [ ] 데이터베이스 비밀번호 변경
+- [ ] SSL/HTTPS 설정
+- [ ] 방화벽 설정 (필요한 포트만 개방)
+- [ ] 정기적인 백업 설정
+
+### 방법 1-2: AWS EC2에 Docker로 배포 (프로덕션)
+
+EC2 인스턴스에 Docker Compose로 전체 스택을 배포합니다. 자세한 내용은 **[EC2 배포 가이드](deploy/EC2_DEPLOYMENT.md)**를 참고하세요.
+
+#### 빠른 시작 (요약)
+
+1. **EC2 인스턴스 생성**
+   - Ubuntu 22.04 LTS
+   - 최소 t3.small (권장: t3.medium)
+   - 보안 그룹: SSH(22), HTTP(80), HTTPS(443)
+
+2. **서버 초기 설정**
+   ```bash
+   # EC2 접속
+   ssh -i "your-key.pem" ubuntu@your-ec2-ip
+
+   # 자동 설정 스크립트 실행 (Docker, UFW, fail2ban 설치)
+   sudo bash deploy/ec2-setup.sh
+   ```
+
+3. **프로젝트 배포**
+   ```bash
+   # Git Clone
+   cd /home/ubuntu/app
+   git clone <repository-url> .
+
+   # 환경변수 설정
+   cp .env.docker .env
+   vim .env  # SECRET_KEY, DB_PASSWORD 등 수정
+
+   # Docker Compose 실행
+   docker compose up -d --build
+   ```
+
+4. **SSL 설정 (Let's Encrypt)**
+   ```bash
+   sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+   ```
+
+**배포 스크립트:**
+- `deploy/ec2-setup.sh`: EC2 서버 초기 설정 (Docker 설치 등)
+- `deploy/deploy.sh`: 자동 배포 스크립트 (백업, git pull, 재시작)
+
+**자세한 가이드:** [deploy/EC2_DEPLOYMENT.md](deploy/EC2_DEPLOYMENT.md)
 
 ### 방법 2: 로컬 환경에서 실행
 
@@ -222,6 +346,19 @@ celery -A config worker -l info
 celery -A config beat -l info
 ```
 
+## 웹 대시보드
+
+프로젝트 루트(`http://localhost:8000/`)에 접속하면 관리자 대시보드를 확인할 수 있습니다.
+
+### 주요 기능
+- **다크 모드/라이트 모드 전환**: 우측 상단 테마 토글 버튼으로 테마 변경 가능
+- **시스템 통계**: 전체 사용자 수, API Key 수 등 실시간 통계 확인
+- **API 엔드포인트 목록**: 사용 가능한 모든 API 엔드포인트 한눈에 확인
+- **빠른 링크**: API 문서, 관리자 페이지로 바로 이동
+- **반응형 디자인**: 모바일, 태블릿, 데스크톱 모든 환경 지원
+
+테마 설정은 브라우저 로컬 스토리지에 저장되어 다음 방문 시에도 유지됩니다.
+
 ## API 엔드포인트
 
 ### 인증 (Authentication)
@@ -240,6 +377,15 @@ PATCH  /api/v1/auth/me/                # 프로필 부분 수정
 PATCH  /api/v1/auth/me/avatar/         # 프로필 이미지 변경
 POST   /api/v1/auth/me/password/       # 비밀번호 변경
 DELETE /api/v1/auth/me/delete/         # 계정 삭제
+```
+
+### API Key 관리 (Public Token)
+```
+GET    /api/v1/auth/api-keys/          # API Key 목록 조회
+POST   /api/v1/auth/api-keys/          # API Key 생성
+GET    /api/v1/auth/api-keys/{id}/     # API Key 상세 조회
+PATCH  /api/v1/auth/api-keys/{id}/     # API Key 수정
+DELETE /api/v1/auth/api-keys/{id}/     # API Key 삭제
 ```
 
 ### 헬스 체크
@@ -414,3 +560,118 @@ This project is licensed under the MIT License.
 **개발 시작일**: 2025
 **Python 버전**: 3.12
 **Django 버전**: 5.1.4
+
+## API Key (Public Token) 사용하기
+
+### API Key 생성
+
+1. **JWT 토큰으로 로그인**
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "your@email.com", "password": "your_password"}'
+```
+
+2. **API Key 생성**
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/auth/api-keys/ \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Service API Key",
+    "can_read": true,
+    "can_write": true,
+    "rate_limit": 1000
+  }'
+```
+
+**응답**:
+```json
+{
+  "api_key": {
+    "id": 1,
+    "name": "My Service API Key",
+    "key": "vF3kL9mP2xQ4wR8tY1nZ5cB7jH6dS0aE...",  // 이 키를 저장하세요!
+    "prefix": "vF3kL9mP",
+    "is_active": true,
+    "can_read": true,
+    "can_write": true,
+    "rate_limit": 1000,
+    "created_at": "2025-01-01T00:00:00Z"
+  },
+  "message": "API Key가 생성되었습니다. 이 키는 다시 확인할 수 없으니 안전한 곳에 보관하세요."
+}
+```
+
+### API Key로 인증하기
+
+생성된 API Key를 `X-API-Key` 헤더에 넣어서 사용:
+
+```bash
+curl -X GET http://127.0.0.1:8000/api/v1/auth/me/ \
+  -H "X-API-Key: vF3kL9mP2xQ4wR8tY1nZ5cB7jH6dS0aE..."
+```
+
+### API Key 관리
+
+```bash
+# API Key 목록 조회
+GET /api/v1/auth/api-keys/
+
+# 특정 API Key 조회
+GET /api/v1/auth/api-keys/{id}/
+
+# API Key 수정 (활성화/비활성화, 권한 변경)
+PATCH /api/v1/auth/api-keys/{id}/
+
+# API Key 삭제
+DELETE /api/v1/auth/api-keys/{id}/
+```
+
+### API Key 권한
+
+- **can_read**: 읽기 권한 (GET 요청)
+- **can_write**: 쓰기 권한 (POST, PUT, PATCH 요청)
+- **can_delete**: 삭제 권한 (DELETE 요청)
+- **rate_limit**: 시간당 요청 제한 (기본 1000)
+
+### 사용 예시
+
+#### Python
+```python
+import requests
+
+API_KEY = "vF3kL9mP2xQ4wR8tY1nZ5cB7jH6dS0aE..."
+headers = {"X-API-Key": API_KEY}
+
+# API 호출
+response = requests.get(
+    "http://127.0.0.1:8000/api/v1/auth/me/",
+    headers=headers
+)
+print(response.json())
+```
+
+#### JavaScript
+```javascript
+const API_KEY = "vF3kL9mP2xQ4wR8tY1nZ5cB7jH6dS0aE...";
+
+fetch("http://127.0.0.1:8000/api/v1/auth/me/", {
+  headers: {
+    "X-API-Key": API_KEY
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log(data));
+```
+
+### JWT vs API Key 비교
+
+| 항목 | JWT Token | API Key (Public Token) |
+|------|-----------|----------------------|
+| 유효기간 | 60분 (갱신 가능) | 무제한 (만료일 설정 가능) |
+| 용도 | 사용자 인증 | 서비스/앱 인증 |
+| 헤더 | `Authorization: Bearer <token>` | `X-API-Key: <key>` |
+| 권한 관리 | 사용자 역할 기반 | API Key별 권한 설정 |
+| Rate Limiting | 1000/시간 | 커스터마이징 가능 |
+

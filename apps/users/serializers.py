@@ -5,6 +5,7 @@ User serializers
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from .models import APIKey
 
 User = get_user_model()
 
@@ -106,3 +107,29 @@ class AvatarUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['avatar']
+
+
+class APIKeySerializer(serializers.ModelSerializer):
+    """
+    Serializer for API Key (Public Token)
+    """
+    key = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = APIKey
+        fields = [
+            'id', 'name', 'key', 'prefix', 'is_active',
+            'can_read', 'can_write', 'can_delete',
+            'rate_limit', 'last_used_at', 'expires_at',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'key', 'prefix', 'last_used_at', 'created_at']
+
+
+class APIKeyCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating API Key
+    """
+    class Meta:
+        model = APIKey
+        fields = ['name', 'can_read', 'can_write', 'can_delete', 'rate_limit', 'expires_at']

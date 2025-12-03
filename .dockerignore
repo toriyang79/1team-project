@@ -1,10 +1,15 @@
+# Python
 **/__pycache__
 **/*.pyc
 **/*.pyo
 **/*.pyd
 .Python
+*.py[cod]
+*$py.class
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Testing
 .tox/
 .coverage
 .coverage.*
@@ -12,12 +17,10 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 *.cover
-*.log
-.git
-.gitignore
-.mypy_cache
 .pytest_cache
 .hypothesis
+
+# Virtual environments
 .env
 .venv
 env/
@@ -25,13 +28,48 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Database
 db.sqlite3
 db.sqlite3-journal
+*.db
+
+# Media and static files (will be collected in Docker)
 media/
 staticfiles/
-.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
 .vscode
 .idea
 *.swp
 *.swo
 *~
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Deployment
+deploy/
+*.pem
+*.key
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log

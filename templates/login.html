@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}로그인 - 미디어 플랫폼{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">로그인</h1>
+        <p class="auth-subtitle">미디어 플랫폼에 오신 것을 환영합니다</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="auth-form" id="loginForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="example@email.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="비밀번호를 입력하세요"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="remember_me">
+                    <span>로그인 상태 유지</span>
+                </label>
+                <a href="#" class="link-secondary" onclick="return false;">비밀번호 찾기</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">로그인</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>계정이 없으신가요? <a href="/register/" class="link-primary">회원가입</a></p>
+        </div>
+
+        <div class="divider">
+            <span>또는</span>
+        </div>
+
+        <div class="social-login">
+            <button class="btn-social btn-google" onclick="return false;">
+                <span>🔍</span>
+                Google로 로그인
+            </button>
+            <button class="btn-social btn-github" onclick="return false;">
+                <span>🐙</span>
+                GitHub로 로그인
+            </button>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: calc(100vh - 400px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem 1rem;
+    }
+
+    .auth-card {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 3rem;
+        max-width: 450px;
+        width: 100%;
+        box-shadow: 0 4px 12px var(--card-shadow);
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        text-align: center;
+    }
+
+    .auth-subtitle {
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-form {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+    .link-secondary {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .link-secondary:hover {
+        color: var(--accent-color);
+    }
+
+    .link-primary {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .link-primary:hover {
+        text-decoration: underline;
+    }
+
+    .btn-block {
+        width: 100%;
+        padding: 0.875rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .auth-footer {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .divider {
+        position: relative;
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background-color: var(--border-color);
+    }
+
+    .divider span {
+        position: relative;
+        background-color: var(--bg-secondary);
+        padding: 0 1rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .social-login {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-social {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-social:hover {
+        background-color: var(--bg-tertiary);
+        border-color: var(--accent-color);
+    }
+
+    .btn-social span {
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 480px) {
+        .auth-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

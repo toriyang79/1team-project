@@ -4,8 +4,10 @@ Custom User model
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 from apps.common.models import TimeStampedModel
 from apps.common.validators import validate_image_file
+import secrets
 
 
 class UserManager(BaseUserManager):
@@ -91,3 +93,52 @@ class User(AbstractUser, TimeStampedModel):
     def is_creator(self):
         """Check if user is a creator"""
         return self.role in ['creator', 'admin']
+
+
+class APIKey(TimeStampedModel):
+    """
+    API Key model for service authentication (Public Token)
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='api_keys', verbose_name='사용자')
+    name = models.CharField(max_length=100, verbose_name='API Key 이름')
+    key = models.CharField(max_length=64, unique=True, verbose_name='API Key')
+    prefix = models.CharField(max_length=8, verbose_name='Key Prefix')
+    is_active = models.BooleanField(default=True, verbose_name='활성화 여부')
+    last_used_at = models.DateTimeField(null=True, blank=True, verbose_name='마지막 사용일시')
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name='만료일시')
+
+    # Permissions
+    can_read = models.BooleanField(default=True, verbose_name='읽기 권한')
+    can_write = models.BooleanField(default=False, verbose_name='쓰기 권한')
+    can_delete = models.BooleanField(default=False, verbose_name='삭제 권한')
+
+    # Rate limiting
+    rate_limit = models.IntegerField(default=1000, verbose_name='시간당 요청 제한')
+
+    class Meta:
+        db_table = 'api_keys'
+        verbose_name = 'API Key'
+        verbose_name_plural = 'API Keys'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.prefix}...)"
+
+    @staticmethod
+    def generate_key():
+        """Generate a secure API key"""
+        return secrets.token_urlsafe(48)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+            self.prefix = self.key[:8]
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        """Check if API key is valid"""
+        if not self.is_active:
+            return False
+        if self.expires_at and self.expires_at < timezone.now():
+            return False
+        return True
