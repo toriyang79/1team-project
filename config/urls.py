@@ -18,6 +18,9 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
+    # Django Allauth
+    path('accounts/', include('allauth.urls')),
+
     # Admin
     path('admin/', admin.site.urls),
 

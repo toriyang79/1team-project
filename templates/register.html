@@ -103,14 +103,22 @@
         </div>
 
         <div class="social-login">
-            <button class="btn-social btn-google" onclick="return false;">
+            <a href="{% url 'google_login' %}" class="btn-social btn-google">
                 <span>🔍</span>
                 Google로 가입
-            </button>
-            <button class="btn-social btn-github" onclick="return false;">
+            </a>
+            <a href="{% url 'github_login' %}" class="btn-social btn-github">
                 <span>🐙</span>
                 GitHub로 가입
-            </button>
+            </a>
+            <a href="{% url 'naver_login' %}" class="btn-social btn-naver">
+                <span>🟢</span>
+                네이버로 가입
+            </a>
+            <a href="{% url 'kakao_login' %}" class="btn-social btn-kakao">
+                <span>💬</span>
+                카카오로 가입
+            </a>
         </div>
     </div>
 </div>
@@ -293,6 +301,28 @@
 
     .btn-social span {
         font-size: 1.2rem;
+    }
+
+    .btn-naver {
+        background-color: #03C75A;
+        color: white;
+        border-color: #03C75A;
+    }
+
+    .btn-naver:hover {
+        background-color: #02B350;
+        border-color: #02B350;
+    }
+
+    .btn-kakao {
+        background-color: #FEE500;
+        color: #000000;
+        border-color: #FEE500;
+    }
+
+    .btn-kakao:hover {
+        background-color: #F5DC00;
+        border-color: #F5DC00;
     }
 
     @media (max-width: 480px) {
