@@ -1,0 +1,71 @@
+# Git 관련
+.git
+.gitignore
+.gitattributes
+
+# 환경 변수 파일 (보안)
+.env
+.env.*
+!.env.example
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 가상 환경
+venv/
+env/
+ENV/
+.venv
+
+# 테스트 관련
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 로그 파일
+*.log
+logs/
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker 관련
+docker-compose.yml
+compose.yml
+Dockerfile
+.dockerignore
+
+# 문서
+*.md
+!README.md
+docs/
+
+# 개발 도구
+.editorconfig
+.flake8
+.mypy_cache/
+.ruff_cache/
+
+# 업로드된 파일 (개발용, 프로덕션에서는 볼륨 사용)
+uploads/
+
+# 기타
+.claude/
+*.bak
+*.tmp

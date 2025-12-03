@@ -1,0 +1,87 @@
+# Docker Compose 파일 - EC2 프로덕션 배포용
+# 사용법: docker compose -f compose.prod.yml up -d
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai_image_community_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-ai_image_community}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_image_community}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - ai_image_network
+
+  # FastAPI 애플리케이션
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_image_community_api
+    ports:
+      - "8000:8000"
+    environment:
+      # 데이터베이스 설정
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ai_image_community}
+
+      # JWT 설정
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+
+      # 파일 업로드 설정
+      UPLOAD_DIR: /app/uploads/images
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      ALLOWED_EXTENSIONS: ${ALLOWED_EXTENSIONS:-["jpg","jpeg","png","gif","webp"]}
+
+      # 애플리케이션 설정
+      APP_NAME: ${APP_NAME:-AI Image Community API}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      DEBUG: ${DEBUG:-False}
+
+      # 개발 토큰 발급 비활성화 (보안)
+      ENABLE_DEV_AUTH: ${ENABLE_DEV_AUTH:-false}
+
+      # 서버 설정
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8000}
+    volumes:
+      # 프로덕션: 로컬 코드 마운트 제거, 업로드 디렉토리만 유지
+      - upload_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    networks:
+      - ai_image_network
+    restart: unless-stopped
+    # 프로덕션: --reload 제거
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+  upload_data:
+    driver: local
+
+networks:
+  ai_image_network:
+    driver: bridge

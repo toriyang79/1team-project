@@ -1,5 +1,5 @@
-# Docker Compose 파일 (최신 스펙)
-# version 필드는 더 이상 필요하지 않음 (Compose v2+)
+# Docker Compose 파일 - 로컬 개발 환경용
+# 프로덕션 배포: compose.prod.yml 사용
 
 services:
   # PostgreSQL 데이터베이스

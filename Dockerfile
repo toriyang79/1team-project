@@ -27,7 +27,6 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # 애플리케이션 코드 복사
 COPY ./app ./app
 COPY ./main.py .
-COPY ./.env .
 
 # 업로드 디렉토리 생성
 RUN mkdir -p /app/uploads/images
