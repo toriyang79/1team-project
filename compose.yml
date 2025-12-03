@@ -1,4 +1,5 @@
-
+# Docker Compose 파일 (최신 스펙)
+# version 필드는 더 이상 필요하지 않음 (Compose v2+)
 
 services:
   # PostgreSQL 데이터베이스
@@ -14,35 +15,56 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # 초기화 스크립트 (선택사항)
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_image_community"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    restart: unless-stopped
     networks:
       - ai_image_network
 
   # FastAPI 애플리케이션 (선택사항 - 로컬 개발 시에는 직접 실행 가능)
-  # fastapi:
-  #   build: .
-  #   container_name: ai_image_community_api
-  #   ports:
-  #     - "8000:8000"
-  #   environment:
-  #     - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/ai_image_community
-  #   volumes:
-  #     - ./app:/app/app
-  #     - ./uploads:/app/uploads
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - ai_image_network
-  #   command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_image_community_api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/ai_image_community
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      UPLOAD_DIR: /app/uploads/images
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+      ALLOWED_EXTENSIONS: ${ALLOWED_EXTENSIONS}
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    networks:
+      - ai_image_network
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+          ignore:
+            - __pycache__/
+            - "*.pyc"
 
 volumes:
   postgres_data:
+    driver: local
 
 networks:
   ai_image_network:
