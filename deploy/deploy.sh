@@ -22,42 +22,34 @@ if [ -d "$APP_DIR" ]; then
     # 데이터베이스 백업
     if docker ps | grep -q media_platform_db; then
         echo "   - PostgreSQL 데이터베이스 백업..."
-        docker exec media_platform_db pg_dump -U postgres media_platform > $BACKUP_DIR/db_backup_$TIMESTAMP.sql
+        docker exec media_platform_db pg_dump -U postgres media_platform > $BACKUP_DIR/db_backup_$TIMESTAMP.sql || echo "   - DB 백업 실패 (계속 진행)"
     fi
 
     # 미디어 파일 백업
     if [ -d "$APP_DIR/media" ]; then
         echo "   - 미디어 파일 백업..."
-        tar -czf $BACKUP_DIR/media_backup_$TIMESTAMP.tar.gz -C $APP_DIR media/
+        tar -czf $BACKUP_DIR/media_backup_$TIMESTAMP.tar.gz -C $APP_DIR media/ || echo "   - 미디어 백업 실패 (계속 진행)"
     fi
-fi
-
-# Git Pull (코드가 이미 있는 경우)
-if [ -d "$APP_DIR/.git" ]; then
-    echo "2. 최신 코드 가져오기..."
-    cd $APP_DIR
-    git fetch origin
-    git pull origin main  # 또는 사용 중인 브랜치 이름
-else
-    echo "2. Git 저장소가 없습니다. 수동으로 코드를 배포하세요."
 fi
 
 # .env 파일 확인
 if [ ! -f "$APP_DIR/.env" ]; then
     echo "⚠️  경고: .env 파일이 없습니다!"
-    echo "   .env.docker 파일을 .env로 복사하고 설정을 수정하세요:"
-    echo "   cp .env.docker .env"
-    echo "   vim .env"
+    echo "   GitHub Actions에서 .env 파일이 생성되어야 합니다."
     exit 1
 fi
 
 # Docker Compose로 배포
-echo "3. Docker 이미지 빌드 및 컨테이너 시작..."
+echo "2. Docker 이미지 빌드 및 컨테이너 시작..."
 cd $APP_DIR
 
 # 기존 컨테이너 중지
 echo "   - 기존 컨테이너 중지..."
-docker compose down
+docker compose down || echo "   - 실행 중인 컨테이너 없음"
+
+# 사용하지 않는 이미지 정리
+echo "   - 사용하지 않는 Docker 리소스 정리..."
+docker system prune -f
 
 # 새 이미지 빌드 및 시작
 echo "   - 새 이미지 빌드..."
@@ -67,9 +59,20 @@ echo "   - 컨테이너 시작..."
 docker compose up -d
 
 # 컨테이너 상태 확인
-echo "4. 컨테이너 상태 확인..."
-sleep 5
+echo "3. 컨테이너 상태 확인..."
+sleep 10
 docker compose ps
+
+# 헬스체크
+echo "4. 서비스 헬스체크..."
+for i in {1..30}; do
+    if docker compose ps | grep -q "healthy"; then
+        echo "   ✓ 서비스가 정상적으로 시작되었습니다!"
+        break
+    fi
+    echo "   - 대기 중... ($i/30)"
+    sleep 2
+done
 
 # 로그 확인
 echo "================================"
@@ -81,3 +84,6 @@ echo "상태 확인: docker compose ps"
 echo "컨테이너 접속: docker compose exec web bash"
 echo ""
 echo "백업 위치: $BACKUP_DIR"
+echo ""
+echo "최근 로그:"
+docker compose logs --tail=20 web

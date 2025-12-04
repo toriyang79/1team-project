@@ -1,0 +1,109 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - feature/common_backend
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          # Django Settings
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=False
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+
+          # Database Settings
+          DB_ENGINE=django.db.backends.postgresql
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=db
+          DB_PORT=5432
+
+          # JWT Settings
+          JWT_ACCESS_TOKEN_LIFETIME=60
+          JWT_REFRESH_TOKEN_LIFETIME=1440
+
+          # File Upload Settings
+          MAX_UPLOAD_SIZE=104857600
+
+          # Redis Settings
+          REDIS_URL=redis://redis:6379/0
+
+          # CORS Settings
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+
+          # Email Settings
+          EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+          EMAIL_HOST=smtp.gmail.com
+          EMAIL_PORT=587
+          EMAIL_USE_TLS=True
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          EOF
+
+      - name: Deploy to EC2
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.EC2_HOST }}
+          REMOTE_USER: ubuntu
+          TARGET: /home/ubuntu/app
+          EXCLUDE: |
+            /.git/
+            /.github/
+            /logs/
+            *.pyc
+            __pycache__/
+            .env.example
+            .env.docker
+            README.md
+            IMPLEMENTATION.md
+            SKILL.md
+            DEPLOYMENT_DOMAIN_SETUP.md
+
+      - name: Execute deployment script on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/app
+
+            # Docker 및 Docker Compose가 설치되어 있는지 확인
+            if ! command -v docker &> /dev/null; then
+              echo "Docker is not installed. Installing Docker..."
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              sudo usermod -aG docker ubuntu
+            fi
+
+            # 배포 스크립트 실행
+            chmod +x deploy/deploy.sh
+            bash deploy/deploy.sh
+
+      - name: Health check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/app
+            echo "Waiting for services to start..."
+            sleep 10
+            docker compose ps
+            docker compose logs --tail=50 web
