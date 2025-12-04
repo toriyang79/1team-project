@@ -24,6 +24,11 @@ CSRF_TRUSTED_ORIGINS = config(
     default='http://localhost:3000,http://127.0.0.1:3000,https://www.artlion.p-e.kr'
 ).split(',')
 
+# Nginx 프록시 뒤에 있을 때 필요한 설정 (DEBUG 모드와 관계없이 항상 적용)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -303,11 +308,6 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-
-    # Nginx 프록시 뒤에 있을 때 필요한 설정
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    USE_X_FORWARDED_HOST = True
-    USE_X_FORWARDED_PORT = True
 
 # Django Allauth Settings
 AUTHENTICATION_BACKENDS = [
