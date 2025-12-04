@@ -50,7 +50,6 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-      - ./logs:/app/logs
     expose:
       - "8000"
     environment:
@@ -97,7 +96,7 @@ services:
     command: celery -A config worker -l info --concurrency=2
     volumes:
       - media_volume:/app/media
-      - ./logs:/app/logs
+
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_HOST=db
@@ -120,8 +119,7 @@ services:
     container_name: media_platform_celery_beat
     restart: unless-stopped
     command: celery -A config beat -l info
-    volumes:
-      - ./logs:/app/logs
+    #volumes:
     environment:
       - DB_ENGINE=django.db.backends.postgresql
       - DB_HOST=db
