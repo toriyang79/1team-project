@@ -105,8 +105,8 @@ class RegisterView(View):
                 nickname=nickname
             )
 
-            # 자동 로그인
-            login(request, user)
+            # 자동 로그인 (백엔드 명시)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f'{user.nickname}님, 회원가입을 환영합니다!')
             return redirect('/')
 
