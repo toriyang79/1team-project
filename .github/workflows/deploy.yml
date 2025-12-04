@@ -45,6 +45,9 @@ jobs:
           # CORS Settings
           CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
 
+          # CSRF Settings
+          CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}
+
           # Email Settings
           EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
           EMAIL_HOST=smtp.gmail.com

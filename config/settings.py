@@ -304,6 +304,11 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
 
+    # Nginx 프록시 뒤에 있을 때 필요한 설정
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+
 # Django Allauth Settings
 AUTHENTICATION_BACKENDS = [
     # Django backend
