@@ -30,9 +30,26 @@ class Settings(BaseSettings):
     ENABLE_DEV_AUTH: bool = False
 
     # ===== 파일 업로드 설정 =====
+    # STORAGE_BACKEND가 'local'이면 로컬 디스크에 저장, 's3'이면 AWS S3에 저장합니다.
+    STORAGE_BACKEND: str = "local"  # 'local' | 's3'
     UPLOAD_DIR: str = "./uploads/images"
     MAX_FILE_SIZE: int = 10485760  # 10MB (바이트 단위)
     ALLOWED_EXTENSIONS: List[str] = ["jpg", "jpeg", "png", "gif", "webp"]
+
+    # ===== S3 설정 (STORAGE_BACKEND='s3'일 때 사용) =====
+    # 참고: EC2에서는 인스턴스 프로파일(IAM Role) 사용을 권장하며,
+    #       로컬 개발에서는 AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY를 로컬 환경변수로 설정하세요.
+    AWS_REGION: str = ""
+    AWS_S3_BUCKET: str = ""
+    # 버킷 내 저장 경로 프리픽스. 예: "uploads/images" (끝에 슬래시 없이)
+    AWS_S3_PREFIX: str = "uploads/images"
+    # 업로드 시 부여할 ACL. 퍼블릭 접근이 필요한 경우 'public-read'. 사내/비공개는 'private'.
+    AWS_S3_ACL: str = "public-read"
+    # 커스텀 엔드포인트(Minio 등) 사용 시 설정. 비어있으면 AWS 기본 엔드포인트 사용.
+    AWS_S3_ENDPOINT_URL: str = ""
+    # 공개 URL 베이스를 오버라이드하고 싶을 때 사용 (예: CloudFront 도메인).
+    # 설정 시: 최종 URL = f"{AWS_S3_PUBLIC_URL}/{key}"
+    AWS_S3_PUBLIC_URL: str = ""
 
     # ===== 서버 설정 =====
     HOST: str = "0.0.0.0"
@@ -76,6 +93,23 @@ class Settings(BaseSettings):
                 # 콤마 구분 문자열 폴백
                 return [origin.strip() for origin in v.split(",")]
         return v
+
+    # 하위 호환/별칭 지원: 사용자가 S3_BUCKET_NAME, S3_BASE_URL을 설정했을 경우 매핑
+    @field_validator("AWS_S3_BUCKET", mode="before")
+    @classmethod
+    def alias_bucket_env(cls, v):
+        if v:
+            return v
+        import os
+        return os.getenv("S3_BUCKET_NAME", "")
+
+    @field_validator("AWS_S3_PUBLIC_URL", mode="before")
+    @classmethod
+    def alias_public_url_env(cls, v):
+        if v:
+            return v
+        import os
+        return os.getenv("S3_BASE_URL", "")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -29,10 +29,13 @@ async def lifespan(app: FastAPI):
     print(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} 시작 중...")
     print("=" * 60)
 
-    # 업로드 디렉토리 생성
+    # 업로드 디렉토리 생성 (로컬 스토리지일 때만)
     import os
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    print(f"✅ 업로드 디렉토리 생성: {settings.UPLOAD_DIR}")
+    if settings.STORAGE_BACKEND.lower() == "local":
+        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+        print(f"✅ 업로드 디렉토리 생성: {settings.UPLOAD_DIR}")
+    else:
+        print("ℹ️  S3 스토리지 사용: 로컬 업로드 디렉토리 생성 생략")
 
     # 데이터베이스 초기화 (개발 환경에서만)
     if settings.DEBUG:

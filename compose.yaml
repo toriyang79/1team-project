@@ -42,9 +42,18 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
 
       # 파일 업로드 설정
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
       UPLOAD_DIR: /app/uploads/images
       MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
       ALLOWED_EXTENSIONS: ${ALLOWED_EXTENSIONS:-["jpg","jpeg","png","gif","webp"]}
+
+      # S3 설정 (STORAGE_BACKEND=s3일 때 사용)
+      AWS_REGION: ${AWS_REGION:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_S3_PREFIX: ${AWS_S3_PREFIX:-uploads/images}
+      AWS_S3_ACL: ${AWS_S3_ACL:-public-read}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+      AWS_S3_PUBLIC_URL: ${AWS_S3_PUBLIC_URL:-}
 
       # 애플리케이션 설정
       APP_NAME: ${APP_NAME:-AI Image Community API}

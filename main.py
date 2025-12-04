@@ -32,19 +32,22 @@ if settings.CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-# ===== 정적 파일 서빙 (업로드된 이미지) =====
+# ===== 정적 파일 서빙 (업로드된 이미지, 로컬 스토리지일 때만) =====
 import os
-# uploads 디렉토리가 없으면 생성
-os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
-# 정적 파일 마운트 (uploads 전체 디렉토리)
-uploads_root = "./uploads"
-if os.path.exists(uploads_root):
-    app.mount(
-        "/uploads",
-        StaticFiles(directory=uploads_root),
-        name="uploads"
-    )
+# 로컬 디스크를 사용할 때만 /uploads를 정적 마운트합니다.
+if settings.STORAGE_BACKEND.lower() == "local":
+    # uploads 디렉토리가 없으면 생성
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    # 정적 파일 마운트 (uploads 전체 디렉토리)
+    uploads_root = "./uploads"
+    if os.path.exists(uploads_root):
+        app.mount(
+            "/uploads",
+            StaticFiles(directory=uploads_root),
+            name="uploads"
+        )
 
 # ===== 라우터 등록 =====
 from app.api.v1.router import api_v1_router

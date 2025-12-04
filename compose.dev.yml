@@ -37,9 +37,21 @@ services:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/ai_image_community
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
       UPLOAD_DIR: /app/uploads/images
       MAX_FILE_SIZE: ${MAX_FILE_SIZE}
       ALLOWED_EXTENSIONS: ${ALLOWED_EXTENSIONS}
+      # S3 (로컬에서 테스트하려면 아래 값들도 .env에 채워주세요)
+      AWS_REGION: ${AWS_REGION:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_S3_PREFIX: ${AWS_S3_PREFIX:-uploads/images}
+      AWS_S3_ACL: ${AWS_S3_ACL:-public-read}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+      AWS_S3_PUBLIC_URL: ${AWS_S3_PUBLIC_URL:-}
+      # AWS 자격증명을 환경변수로 주입할 수 있게 허용합니다 (권장: 쉘에서 export로 주입)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
     env_file:
       - .env
     volumes:
