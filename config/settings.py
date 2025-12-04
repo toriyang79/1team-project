@@ -19,10 +19,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 # CSRF Trusted Origins (for Django 4.0+)
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000,https://www.artlion.p-e.kr'
-).split(',')
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000','http://127.0.0.1:3000','https://www.artlion.p-e.kr']
 
 # Nginx 프록시 뒤에 있을 때 필요한 설정 (DEBUG 모드와 관계없이 항상 적용)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
