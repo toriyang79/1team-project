@@ -1,286 +1,155 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>로그인 - Artlion</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eead2b",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#121212",
+                        "text-light": "#1b170d",
+                        "text-dark": "#f3efe7",
+                        "surface-light": "#f3efe7",
+                        "surface-dark": "#1e1e1e",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .message-toast {
+            animation: slideIn 0.3s ease-out;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .message-toast.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .message-toast.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center gap-3 text-text-light dark:text-text-dark mb-4">
+                <div class="size-8 text-primary">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold">Artlion</h1>
+            </a>
+            <h2 class="text-3xl font-black mb-2">로그인</h2>
+            <p class="text-base text-muted-light dark:text-muted-dark">AI 창작의 세계에 오신 것을 환영합니다</p>
+        </div>
 
-{% block title %}로그인 - 미디어 플랫폼{% endblock %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-toast {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h1 class="auth-title">로그인</h1>
-        <p class="auth-subtitle">미디어 플랫폼에 오신 것을 환영합니다</p>
-
-        <form method="post" class="auth-form" id="loginForm">
+        <form method="post" class="bg-surface-light dark:bg-surface-dark rounded-xl p-8 border border-solid border-gray-200 dark:border-surface-dark">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label for="email">이메일</label>
+            <div class="mb-6">
+                <label for="email" class="block text-sm font-medium mb-2">이메일</label>
                 <input
                     type="email"
                     id="email"
                     name="email"
-                    class="form-control"
-                    placeholder="example@email.com"
                     required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="example@email.com"
                     autocomplete="email"
-                >
+                />
             </div>
 
-            <div class="form-group">
-                <label for="password">비밀번호</label>
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium mb-2">비밀번호</label>
                 <input
                     type="password"
                     id="password"
                     name="password"
-                    class="form-control"
-                    placeholder="비밀번호를 입력하세요"
                     required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="비밀번호를 입력하세요"
                     autocomplete="current-password"
-                >
+                />
             </div>
 
-            <div class="form-options">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="remember_me">
-                    <span>로그인 상태 유지</span>
+            <div class="flex items-center justify-between mb-6">
+                <label class="flex items-center">
+                    <input type="checkbox" name="remember_me" class="rounded text-primary focus:ring-primary"/>
+                    <span class="ml-2 text-sm">로그인 상태 유지</span>
                 </label>
-                <a href="#" class="link-secondary" onclick="return false;">비밀번호 찾기</a>
+                <a href="#" class="text-sm text-primary hover:underline">비밀번호 찾기</a>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">로그인</button>
+            <button type="submit" class="w-full bg-primary text-background-dark font-bold py-3 px-6 rounded-full hover:opacity-90 transition-opacity mb-4">
+                로그인
+            </button>
+
+            <p class="text-center text-sm">
+                계정이 없으신가요? <a href="/register/" class="text-primary font-semibold hover:underline">회원가입</a>
+            </p>
         </form>
 
-        <div class="auth-footer">
-            <p>계정이 없으신가요? <a href="/register/" class="link-primary">회원가입</a></p>
-        </div>
+        <div class="mt-8">
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-background-light dark:bg-background-dark text-muted-light dark:text-muted-dark">또는</span>
+                </div>
+            </div>
 
-        <div class="divider">
-            <span>또는</span>
-        </div>
-
-        <div class="social-login">
-            <a href="{% url 'google_login' %}" class="btn-social btn-google">
-                <span>🔍</span>
-                Google로 로그인
-            </a>
-            <a href="{% url 'github_login' %}" class="btn-social btn-github">
-                <span>🐙</span>
-                GitHub로 로그인
-            </a>
-            <a href="{% url 'naver_login' %}" class="btn-social btn-naver">
-                <span>🟢</span>
-                네이버로 로그인
-            </a>
-            <a href="{% url 'kakao_login' %}" class="btn-social btn-kakao">
-                <span>💬</span>
-                카카오로 로그인
-            </a>
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'google_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🔍</span>
+                    <span class="font-medium">Google로 로그인</span>
+                </a>
+                <a href="{% url 'github_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🐙</span>
+                    <span class="font-medium">GitHub로 로그인</span>
+                </a>
+                <a href="{% url 'naver_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#03C75A] text-white hover:bg-[#02B350] transition-colors">
+                    <span>🟢</span>
+                    <span class="font-medium">네이버로 로그인</span>
+                </a>
+                <a href="{% url 'kakao_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#FEE500] text-black hover:bg-[#F5DC00] transition-colors">
+                    <span>💬</span>
+                    <span class="font-medium">카카오로 로그인</span>
+                </a>
+            </div>
         </div>
     </div>
-</div>
-
-{% block extra_css %}
-<style>
-    .auth-container {
-        min-height: calc(100vh - 400px);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem 1rem;
-    }
-
-    .auth-card {
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 3rem;
-        max-width: 450px;
-        width: 100%;
-        box-shadow: 0 4px 12px var(--card-shadow);
-    }
-
-    .auth-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-        text-align: center;
-    }
-
-    .auth-subtitle {
-        color: var(--text-secondary);
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .auth-form {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-        font-weight: 500;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        font-size: 1rem;
-        transition: border-color 0.2s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--accent-color);
-    }
-
-    .form-options {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .checkbox-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-    }
-
-    .checkbox-label input[type="checkbox"] {
-        cursor: pointer;
-    }
-
-    .link-secondary {
-        color: var(--text-secondary);
-        text-decoration: none;
-        font-size: 0.9rem;
-    }
-
-    .link-secondary:hover {
-        color: var(--accent-color);
-    }
-
-    .link-primary {
-        color: var(--accent-color);
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .link-primary:hover {
-        text-decoration: underline;
-    }
-
-    .btn-block {
-        width: 100%;
-        padding: 0.875rem;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .auth-footer {
-        text-align: center;
-        color: var(--text-secondary);
-        margin-bottom: 1.5rem;
-    }
-
-    .divider {
-        position: relative;
-        text-align: center;
-        margin: 2rem 0;
-    }
-
-    .divider::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        width: 100%;
-        height: 1px;
-        background-color: var(--border-color);
-    }
-
-    .divider span {
-        position: relative;
-        background-color: var(--bg-secondary);
-        padding: 0 1rem;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-
-    .social-login {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .btn-social {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-social:hover {
-        background-color: var(--bg-tertiary);
-        border-color: var(--accent-color);
-    }
-
-    .btn-social span {
-        font-size: 1.2rem;
-    }
-
-    .btn-naver {
-        background-color: #03C75A;
-        color: white;
-        border-color: #03C75A;
-    }
-
-    .btn-naver:hover {
-        background-color: #02B350;
-        border-color: #02B350;
-    }
-
-    .btn-kakao {
-        background-color: #FEE500;
-        color: #000000;
-        border-color: #FEE500;
-    }
-
-    .btn-kakao:hover {
-        background-color: #F5DC00;
-        border-color: #F5DC00;
-    }
-
-    @media (max-width: 480px) {
-        .auth-card {
-            padding: 2rem 1.5rem;
-        }
-
-        .auth-title {
-            font-size: 1.5rem;
-        }
-    }
-</style>
-{% endblock %}
-{% endblock %}
+</body>
+</html>

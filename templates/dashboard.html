@@ -43,6 +43,44 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
+        /* Filter Chip Styles */
+        .filter-chip {
+            background-color: #f3efe7;
+            color: #1b170d;
+            transition: all 0.2s ease;
+        }
+
+        .dark .filter-chip {
+            background-color: #1e1e1e;
+            color: #f3efe7;
+        }
+
+        .filter-chip:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .filter-chip:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-chip.active {
+            background-color: #eead2b;
+            color: #121212;
+        }
+
+        .filter-chip.active p {
+            font-weight: 700;
+        }
+
+        /* Content Sections */
+        .content-section {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .content-section.hidden {
+            display: none !important;
+        }
+
         /* Message Toast Styles */
         .messages-container {
             position: fixed;
@@ -119,18 +157,18 @@
                     <!-- Navigation Bar -->
                     <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-surface-light dark:border-surface-dark/40 px-4 py-3">
                         <div class="flex items-center gap-8">
-                            <div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+                            <a href="/" class="flex items-center gap-3 text-text-light dark:text-text-dark hover:opacity-80 transition-opacity">
                                 <div class="size-6 text-primary">
                                     <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                                         <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
                                     </svg>
                                 </div>
                                 <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Artlion</h2>
-                            </div>
+                            </a>
                             <nav class="hidden md:flex items-center gap-9">
-                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#">이미지</a>
-                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#">비디오</a>
-                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#">음악</a>
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#" onclick="filterContent('image'); return false;">이미지</a>
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#" onclick="filterContent('video'); return false;">비디오</a>
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80" href="#" onclick="filterContent('music'); return false;">음악</a>
                             </nav>
                         </div>
                         <div class="flex flex-1 justify-end items-center gap-4">
@@ -142,6 +180,9 @@
                                     <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-text-light dark:text-text-dark focus:outline-0 focus:ring-0 border-none bg-surface-light dark:bg-surface-dark h-full placeholder:text-muted-light dark:placeholder:text-muted-dark px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
                                 </div>
                             </label>
+                            <button id="themeToggle" class="flex items-center justify-center h-10 w-10 rounded-full bg-surface-light dark:bg-surface-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors" aria-label="Toggle theme">
+                                <span id="themeIcon" class="text-2xl">🌙</span>
+                            </button>
                             <div class="flex gap-2">
                                 {% if user.is_authenticated %}
                                     <span class="flex items-center text-sm font-medium px-4">👋 {{ user.nickname }}님</span>
@@ -173,32 +214,32 @@
                                             인공지능이 만든 놀라운 이미지, 음악, 비디오를 발견하고 공유하세요.
                                         </h2>
                                     </div>
-                                    <button class="flex self-start min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+                                    <a href="{% if user.is_authenticated %}#{% else %}/register/{% endif %}" class="flex self-start min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
                                         <span class="truncate">지금 시작하기</span>
-                                    </button>
+                                    </a>
                                 </div>
                                 <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl @[480px]:aspect-video @[864px]:w-2/5" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAV_loKHEruo1grAotPyRuJ5KJLXj2wdBiyb_kVhQzcYAAqvNMebhZIcUE7IFlaCMz82yRIwukwBGr3uQrjPDjBsi9RE0tkUlBTdHxhcrXAwykoahhH2jCJucCLp-6lQnRAut2AHbzAQclcEMSbfjDdbfw74TUM-RWb7q0kWdvOvoTzL3JRND3JSqsj70xLQvDUwJgcxc3JaEzy8sVUiKokpaOhIcUTmT2tehrSe6RcyzgBvgp42kxuBxfdaN5FG9f4xGmo33AAEvUK");'></div>
                             </div>
                         </div>
 
                         <!-- Filter Chips -->
-                        <div class="flex gap-3 p-4 flex-wrap">
-                            <div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary pl-5 pr-5 cursor-pointer">
-                                <p class="text-background-dark text-sm font-bold leading-normal">전체</p>
+                        <div class="flex gap-3 p-4 flex-wrap" id="filterChips">
+                            <div class="filter-chip active flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="all" onclick="filterContent('all')">
+                                <p class="text-sm font-bold leading-normal">전체</p>
                             </div>
-                            <div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-surface-light dark:bg-surface-dark pl-5 pr-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">이미지</p>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="image" onclick="filterContent('image')">
+                                <p class="text-sm font-medium leading-normal">이미지</p>
                             </div>
-                            <div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-surface-light dark:bg-surface-dark pl-5 pr-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">음악</p>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="music" onclick="filterContent('music')">
+                                <p class="text-sm font-medium leading-normal">음악</p>
                             </div>
-                            <div class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full bg-surface-light dark:bg-surface-dark pl-5 pr-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">비디오</p>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="video" onclick="filterContent('video')">
+                                <p class="text-sm font-medium leading-normal">비디오</p>
                             </div>
                         </div>
 
                         <!-- Popular Images Section -->
-                        <div>
+                        <div class="content-section" data-category="image">
                             <div class="flex justify-between items-center px-4 pb-3 pt-8">
                                 <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em]">인기 이미지</h2>
                                 <a class="text-sm font-bold text-primary hover:underline" href="#">모두 보기</a>
@@ -220,7 +261,7 @@
                         </div>
 
                         <!-- Trending Music Section -->
-                        <div>
+                        <div class="content-section" data-category="music">
                             <div class="flex justify-between items-center px-4 pb-3 pt-8">
                                 <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em]">인기 음악</h2>
                                 <a class="text-sm font-bold text-primary hover:underline" href="#">모두 보기</a>
@@ -321,7 +362,55 @@
                     toast.style.display = 'none';
                 }, 5000);
             });
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+
+            // Load saved theme from localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.classList.toggle('dark', savedTheme === 'dark');
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = html.classList.toggle('dark');
+                const newTheme = isDark ? 'dark' : 'light';
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
         });
+
+        // Filter content function
+        function filterContent(filter) {
+            const sections = document.querySelectorAll('.content-section');
+            const chips = document.querySelectorAll('.filter-chip');
+
+            // Update active chip
+            chips.forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === filter) {
+                    chip.classList.add('active');
+                }
+            });
+
+            // Show/hide sections
+            sections.forEach(section => {
+                if (filter === 'all') {
+                    section.classList.remove('hidden');
+                } else {
+                    if (section.dataset.category === filter) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
