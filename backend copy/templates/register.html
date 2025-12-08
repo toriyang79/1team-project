@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>회원가입 - Artlion</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eead2b",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#121212",
+                        "text-light": "#1b170d",
+                        "text-dark": "#f3efe7",
+                        "surface-light": "#f3efe7",
+                        "surface-dark": "#1e1e1e",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .message-toast {
+            animation: slideIn 0.3s ease-out;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .message-toast.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .message-toast.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center gap-3 text-text-light dark:text-text-dark mb-4">
+                <div class="size-8 text-primary">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold">Artlion</h1>
+            </a>
+            <h2 class="text-3xl font-black mb-2">회원가입</h2>
+            <p class="text-base text-muted-light dark:text-muted-dark">새로운 계정을 만들어보세요</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-toast {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="registerForm" class="bg-surface-light dark:bg-surface-dark rounded-xl p-8 border border-solid border-gray-200 dark:border-surface-dark">
+            {% csrf_token %}
+
+            <div class="mb-6">
+                <label for="email" class="block text-sm font-medium mb-2">이메일 *</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="example@email.com"
+                    autocomplete="email"
+                />
+            </div>
+
+            <div class="mb-6">
+                <label for="nickname" class="block text-sm font-medium mb-2">닉네임 *</label>
+                <input
+                    type="text"
+                    id="nickname"
+                    name="nickname"
+                    required
+                    minlength="2"
+                    maxlength="50"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="사용할 닉네임을 입력하세요"
+                    autocomplete="username"
+                />
+                <small class="text-xs text-gray-500 mt-1 block">2-50자 이내로 입력해주세요</small>
+            </div>
+
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium mb-2">비밀번호 *</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    minlength="8"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="8자 이상의 비밀번호"
+                    autocomplete="new-password"
+                />
+                <small class="text-xs text-gray-500 mt-1 block">최소 8자 이상, 영문/숫자/특수문자 포함 권장</small>
+            </div>
+
+            <div class="mb-6">
+                <label for="password_confirm" class="block text-sm font-medium mb-2">비밀번호 확인 *</label>
+                <input
+                    type="password"
+                    id="password_confirm"
+                    name="password_confirm"
+                    required
+                    minlength="8"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="비밀번호를 다시 입력하세요"
+                    autocomplete="new-password"
+                />
+            </div>
+
+            <div class="mb-4">
+                <label class="flex items-start">
+                    <input type="checkbox" name="terms" required class="mt-1 rounded text-primary focus:ring-primary"/>
+                    <span class="ml-2 text-sm">이용약관 및 개인정보처리방침에 동의합니다 *</span>
+                </label>
+            </div>
+
+            <div class="mb-6">
+                <label class="flex items-start">
+                    <input type="checkbox" name="marketing" class="mt-1 rounded text-primary focus:ring-primary"/>
+                    <span class="ml-2 text-sm text-gray-600">마케팅 정보 수신에 동의합니다 (선택)</span>
+                </label>
+            </div>
+
+            <button type="submit" class="w-full bg-primary text-background-dark font-bold py-3 px-6 rounded-full hover:opacity-90 transition-opacity mb-4">
+                회원가입
+            </button>
+
+            <p class="text-center text-sm">
+                이미 계정이 있으신가요? <a href="/login/" class="text-primary font-semibold hover:underline">로그인</a>
+            </p>
+        </form>
+
+        <div class="mt-8">
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-background-light dark:bg-background-dark text-muted-light dark:text-muted-dark">또는</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'google_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🔍</span>
+                    <span class="font-medium">Google로 가입</span>
+                </a>
+                <a href="{% url 'github_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🐙</span>
+                    <span class="font-medium">GitHub로 가입</span>
+                </a>
+                <a href="{% url 'naver_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#03C75A] text-white hover:bg-[#02B350] transition-colors">
+                    <span>🟢</span>
+                    <span class="font-medium">네이버로 가입</span>
+                </a>
+                <a href="{% url 'kakao_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#FEE500] text-black hover:bg-[#F5DC00] transition-colors">
+                    <span>💬</span>
+                    <span class="font-medium">카카오로 가입</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 비밀번호 확인 검증
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password_confirm').value;
+
+            if (password !== passwordConfirm) {
+                e.preventDefault();
+                alert('비밀번호가 일치하지 않습니다.');
+                document.getElementById('password_confirm').focus();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

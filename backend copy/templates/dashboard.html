@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Artlion - AI로 창작하는 세상</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eead2b",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#121212",
+                        "text-light": "#1b170d",
+                        "text-dark": "#f3efe7",
+                        "surface-light": "#f3efe7",
+                        "surface-dark": "#1e1e1e",
+                        "muted-light": "#9a804c",
+                        "muted-dark": "#9a804c"
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Filter Chip Styles */
+        .filter-chip {
+            background-color: #f3efe7;
+            color: #1b170d;
+            transition: all 0.2s ease;
+        }
+
+        .dark .filter-chip {
+            background-color: #1e1e1e;
+            color: #f3efe7;
+        }
+
+        .filter-chip:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .filter-chip:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-chip.active {
+            background-color: #eead2b;
+            color: #121212;
+        }
+
+        .filter-chip.active p {
+            font-weight: 700;
+        }
+
+        /* Content Sections */
+        .content-section {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .content-section.hidden {
+            display: none !important;
+        }
+
+        /* Message Toast Styles */
+        .messages-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .message-toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 4.7s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem;
+            border-radius: 0.75rem;
+        }
+
+        .message-toast.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+        .message-toast.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="message-toast {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <div class="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center py-5">
+                <div class="layout-content-container flex flex-col w-full max-w-6xl flex-1">
+
+                    <!-- Navigation Bar -->
+                    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-surface-light dark:border-surface-dark/40 px-4 py-3">
+                        <div class="flex items-center gap-8">
+                            <a href="/" class="flex items-center gap-3 text-text-light dark:text-text-dark hover:opacity-80 transition-opacity">
+                                <div class="size-6 text-primary">
+                                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                        <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Artlion</h2>
+                            </a>
+                            <nav class="hidden md:flex items-center gap-9">
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80 cursor-pointer" href="#" onclick="return false;">이미지</a>
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80 cursor-pointer" href="#" onclick="return false;">음악</a>
+                                <a class="text-sm font-medium leading-normal hover:text-primary transition-colors text-text-light/80 dark:text-text-dark/80 cursor-pointer" href="#" onclick="return false;">비디오</a>
+                            </nav>
+                        </div>
+                        <div class="flex flex-1 justify-end items-center gap-4">
+                            <label class="hidden sm:flex flex-col min-w-40 !h-10 max-w-64">
+                                <div class="flex w-full flex-1 items-stretch rounded-full h-full">
+                                    <div class="text-muted-light dark:text-muted-dark flex bg-surface-light dark:bg-surface-dark items-center justify-center pl-4 rounded-l-full border-r-0">
+                                        <span class="material-symbols-outlined text-xl">search</span>
+                                    </div>
+                                    <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-text-light dark:text-text-dark focus:outline-0 focus:ring-0 border-none bg-surface-light dark:bg-surface-dark h-full placeholder:text-muted-light dark:placeholder:text-muted-dark px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
+                                </div>
+                            </label>
+                            <button id="themeToggle" class="flex items-center justify-center h-10 w-10 rounded-full bg-surface-light dark:bg-surface-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors" aria-label="Toggle theme">
+                                <span id="themeIcon" class="text-2xl">🌙</span>
+                            </button>
+                            <div class="flex gap-2">
+                                {% if user.is_authenticated %}
+                                    <span class="flex items-center text-sm font-medium px-4">👋 {{ user.nickname }}님</span>
+                                    <a href="/logout/" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                        <span class="truncate">로그아웃</span>
+                                    </a>
+                                {% else %}
+                                    <a href="/register/" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+                                        <span class="truncate">회원가입</span>
+                                    </a>
+                                    <a href="/login/" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-surface-light dark:bg-surface-dark text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                        <span class="truncate">로그인</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="flex-1">
+                        <!-- Hero Section -->
+                        <div class="@container py-10 md:py-16">
+                            <div class="flex flex-col gap-6 px-4 @[864px]:flex-row @[864px]:items-center">
+                                <div class="flex flex-col gap-6 @[480px]:gap-8 @[864px]:justify-center flex-1">
+                                    <div class="flex flex-col gap-4 text-left">
+                                        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[864px]:text-6xl text-text-light dark:text-text-dark">
+                                            Artlion과 함께하는 AI 창작의 세계
+                                        </h1>
+                                        <h2 class="text-base font-normal leading-normal @[480px]:text-lg text-muted-light dark:text-muted-dark">
+                                            인공지능이 만든 놀라운 이미지, 음악, 비디오를 발견하고 공유하세요.
+                                        </h2>
+                                    </div>
+                                    <a href="{% if user.is_authenticated %}#{% else %}/register/{% endif %}" class="flex self-start min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+                                        <span class="truncate">지금 시작하기</span>
+                                    </a>
+                                </div>
+                                <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl @[480px]:aspect-video @[864px]:w-2/5" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAV_loKHEruo1grAotPyRuJ5KJLXj2wdBiyb_kVhQzcYAAqvNMebhZIcUE7IFlaCMz82yRIwukwBGr3uQrjPDjBsi9RE0tkUlBTdHxhcrXAwykoahhH2jCJucCLp-6lQnRAut2AHbzAQclcEMSbfjDdbfw74TUM-RWb7q0kWdvOvoTzL3JRND3JSqsj70xLQvDUwJgcxc3JaEzy8sVUiKokpaOhIcUTmT2tehrSe6RcyzgBvgp42kxuBxfdaN5FG9f4xGmo33AAEvUK");'></div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Chips -->
+                        <div class="flex gap-3 p-4 flex-wrap" id="filterChips">
+                            <div class="filter-chip active flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="all" onclick="filterContent('all')">
+                                <p class="text-sm font-bold leading-normal">전체</p>
+                            </div>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="image" onclick="filterContent('image')">
+                                <p class="text-sm font-medium leading-normal">이미지</p>
+                            </div>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="music" onclick="filterContent('music')">
+                                <p class="text-sm font-medium leading-normal">음악</p>
+                            </div>
+                            <div class="filter-chip flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full pl-5 pr-5 cursor-pointer" data-filter="video" onclick="filterContent('video')">
+                                <p class="text-sm font-medium leading-normal">비디오</p>
+                            </div>
+                        </div>
+
+                        <!-- Popular Images Section -->
+                        <div class="content-section" data-category="image">
+                            <div class="flex justify-between items-center px-4 pb-3 pt-8">
+                                <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em]">인기 이미지</h2>
+                                <a class="text-sm font-bold text-primary hover:underline" href="#">모두 보기</a>
+                            </div>
+                            <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 p-4">
+                                <div class="bg-cover bg-center flex flex-col gap-3 rounded-lg justify-end p-4 aspect-[3/4] group cursor-pointer" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDIzF_6kbnhv5DShhQ3THg_TjLl4LfCrjVgyMAYr08mELZszci1kv9abKfg5N6fTTLB933UsSmaiaQ1it6SH6M-i3a3TCsb_aDVBIskIiNKjUg2mNimAVQ9YcHE902nXp8JajvoYkDX-1ZArGIPWbkKKEl5j3bhp_XUn1U4dyCJdxjqEIaUeNASwcqFLnWvJgVM3Bdj5IcuqRmvZr9-VsbMe4ZmGDIshp6xWOogI4TRhjkBZ9UuQLyRUjKxf1V2y_NRliKoKSb__Gia");'>
+                                    <p class="text-white text-base font-bold leading-tight w-full line-clamp-2 transform-gpu transition-transform group-hover:-translate-y-1">우주의 바다</p>
+                                </div>
+                                <div class="bg-cover bg-center flex flex-col gap-3 rounded-lg justify-end p-4 aspect-[3/4] group cursor-pointer" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqgdfAC_SWQ5IX3i1IDY3Hid0HslfMkjmHau3h2Tm6WabcJMxEZumzZ4bJzQSGdH6i51ebo0x2MV4rqmWf1-426a053OXnmZ96rZHTy0Sq8jCDG7zJzxxMFC0WISF2hoOnwNJkTYiZ3zAiy2gzLTyL5jCVuueMndns6onz44JOVGLRMBCvJJhrwogemTTVwfVhAKJCmNXfQaoFcLYjKuIKcRtAO5BDiw35JRyw48vcCBsW3O2Il8EWGmR2-NAFykHKKmDfMZzI3ZJ2");'>
+                                    <p class="text-white text-base font-bold leading-tight w-full line-clamp-2 transform-gpu transition-transform group-hover:-translate-y-1">사이버네틱 숲</p>
+                                </div>
+                                <div class="bg-cover bg-center flex flex-col gap-3 rounded-lg justify-end p-4 aspect-[3/4] group cursor-pointer" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBbl6mxIHiohd2t1LSz3AVdAY7LVqPTcytAGYlhB2pQl5TIprGf-xq8hatwglbNi-xKkMf_AuGkhChJO-_HYeTZQXnDMdODEFB8WkRrPTGLAH4BwbBrKsiKy-atZRiP3pZmTTwRf_wCXc4xtzQrcJw0rbe9ScQCr4ezHgD-itlnI5P4gzQhCFEGL0RtcjJQQHGd8PSiNj7ln32O6BpE3zm52XVEKivpj5NlNAXlTppGRtOiBlYwfGKHWSRONzdDYd8fGkxyPoXBwr--");'>
+                                    <p class="text-white text-base font-bold leading-tight w-full line-clamp-2 transform-gpu transition-transform group-hover:-translate-y-1">스팀펑크 도시</p>
+                                </div>
+                                <div class="bg-cover bg-center flex flex-col gap-3 rounded-lg justify-end p-4 aspect-[3/4] group cursor-pointer" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuARMfsTFlk3yVhpo5l09ETQtFCxX2bJK2-Cm2hVkph13aRMageMXCfRB57-Tb2a82dIXp4-4Fip6iEfQqG8xAJOq9jl8Y8lRAz4c0UQzpDLq7abFu-IJU04H8kM2EgQVVHgRwrc7Qbg7eDU1rx0gXmUAyafCmMmfmfuORGeg_ui2K9zP1LC6bEzbH8htpl8-hsheM6_Wfhq-lNlJE4LHvpKsAthYpQtjWepk6VzAabae4H6xHF1NTqmT1Z_v6o44-vv6RSyLh71Ay-A");'>
+                                    <p class="text-white text-base font-bold leading-tight w-full line-clamp-2 transform-gpu transition-transform group-hover:-translate-y-1">꿈꾸는 자의 초상</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trending Music Section -->
+                        <div class="content-section" data-category="music">
+                            <div class="flex justify-between items-center px-4 pb-3 pt-8">
+                                <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em]">인기 음악</h2>
+                                <a class="text-sm font-bold text-primary hover:underline" href="#">모두 보기</a>
+                            </div>
+                            <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 p-4">
+                                <div class="flex flex-col gap-3 group cursor-pointer">
+                                    <div class="relative bg-cover bg-center rounded-lg aspect-square" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYXgxd-2JDtbTxe7_zVfVODwLJpR9QNAwCHPeiTcxdNrQXPQgUHeQYgeue03VaPiFH6JelOPPQYSpHlSfUDJnC5PsWzWvH41XJk55w5ouo3M3YwU3d--yw-j0JJ6COPN26T83MRJDbEW456fT52nT1qbNf_EzS1QiPFNrQFukiZ0XVuaKyQvBgFQATR8Xw-FLEFJNyxHPsWRbHZZtVqBwI4m-UX-_SAIlQGTVM58vvvVhvuxR8jaeFyAAfwlGibGiwX58nqdx-9NI3");'>
+                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-white text-6xl">play_circle</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="font-bold">Echoes of Nebula</p>
+                                        <p class="text-sm text-muted-light dark:text-muted-dark">Synthwave AI</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 group cursor-pointer">
+                                    <div class="relative bg-cover bg-center rounded-lg aspect-square" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBxJcwizPavdnIzyTKNEkhVQmm86kwRTxmD8P3ukgXKnfpK4Ig_laRN4Bjh58I2PsvpL8SEvRVwMKPDA58y7N3EUHOBLERR7puX-VGXrKR4EII5GhPpW9b7r3JmuOFk8Y6NyePLNPG6DE5tih7JPBg1YJpUUp0WvTljiyCmUSINW240JuOyYZsR9lhvI71TdVLgUmZ3ps7zmJq1AGFAZAui2-YdGuVTkN0TPLomk88IXtrXqGTCQYDacD1QJIEwiTJ40T16ANCvAUi8");'>
+                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-white text-6xl">play_circle</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="font-bold">Forest Lullaby</p>
+                                        <p class="text-sm text-muted-light dark:text-muted-dark">Ambient Bot</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 group cursor-pointer">
+                                    <div class="relative bg-cover bg-center rounded-lg aspect-square" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCOrEPoa91U7rgYBmiHg6ekAFBbSLhn2M7fGZS_VYpey6PPLVP7aVkT9gIoFyFyAn6uoEDfMUUuyUvILOiOOaDC6o6zKVJTDiOCZKxUK5dhKwdE_Pj9jocu1TNAqkkR-XRQlWD7b0MIL92P-SAR4w8-ctRGVBUDhBr7mUMF0Iqz9_QzM1q86HMmkWH9cLHz725oba-Wmtr3lYQlZ5CvRjfOA9DRr4sIke70HJ6bLiEm6xg9SvpW1CP0zK-zR1WVde-Xbcri4i6bCGlu");'>
+                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-white text-6xl">play_circle</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="font-bold">Chrome Dreams</p>
+                                        <p class="text-sm text-muted-light dark:text-muted-dark">Cyberfunk Gen</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 group cursor-pointer">
+                                    <div class="relative bg-cover bg-center rounded-lg aspect-square" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDrQjam9lNkWVwuH10nb5SmYWiHkdJRbVmIXYi-aRsSdhqZx6GagAio-J8Me3e4jAY0L3B69OIBvUDtuTFqQPgaUbKhS1yAI0JJM63ah-4B2RhbMvOOMj55bqh3ctfrlL6eK2vpviAmTRmNBEBUnX9NpRcV6R8K5gAyQf5JdV2ASqN9MQ67UVtI0vRGV3zWHSgzPIXY9Dl8gknxnfdU36czufje54l8pIFpEJYhbe0t64LAgGiiTx8fQul2tLp1OrJtvv3jrl-sFckU");'>
+                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-white text-6xl">play_circle</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <p class="font-bold">Solar Flare</p>
+                                        <p class="text-sm text-muted-light dark:text-muted-dark">Orchestral AI</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <!-- Footer -->
+                    <footer class="mt-16 border-t border-solid border-surface-light dark:border-surface-dark/40 py-8 px-4 text-text-light/80 dark:text-text-dark/80">
+                        <div class="w-full flex flex-col gap-8">
+                            <div class="flex flex-col md:flex-row justify-between items-start gap-8">
+                                <div class="flex flex-col gap-4 items-start">
+                                    <div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+                                        <div class="size-6 text-primary">
+                                            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                                <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Artlion</h2>
+                                    </div>
+                                    <div class="flex flex-col items-start gap-2">
+                                        <p class="text-sm">AI로 만드는 창작의 세계</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-8 sm:gap-16 text-sm">
+                                    <div class="flex flex-col items-start gap-4">
+                                        <a class="hover:text-primary transition-colors font-medium" href="#">커뮤니티 가이드</a>
+                                        <a class="hover:text-primary transition-colors font-medium" href="#">개인정보 처리방침</a>
+                                    </div>
+                                    <div class="flex flex-col items-start gap-4">
+                                        <a class="hover:text-primary transition-colors font-medium" href="#">문의하기</a>
+                                        <a class="hover:text-primary transition-colors font-medium" href="#">FAQ</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-8 pt-8 border-t border-solid border-surface-light dark:border-surface-dark/40 text-center">
+                                <p class="text-sm">© 2025 Artlion. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-hide message toasts after 5 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.message-toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 5000);
+            });
+
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+
+            // Load saved theme from localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.classList.toggle('dark', savedTheme === 'dark');
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = html.classList.toggle('dark');
+                const newTheme = isDark ? 'dark' : 'light';
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        });
+
+        // Filter content function
+        function filterContent(filter) {
+            const sections = document.querySelectorAll('.content-section');
+            const chips = document.querySelectorAll('.filter-chip');
+
+            // Update active chip
+            chips.forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === filter) {
+                    chip.classList.add('active');
+                }
+            });
+
+            // Show/hide sections
+            sections.forEach(section => {
+                if (filter === 'all') {
+                    section.classList.remove('hidden');
+                } else {
+                    if (section.dataset.category === filter) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

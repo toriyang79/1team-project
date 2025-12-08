@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>로그인 - Artlion</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eead2b",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#121212",
+                        "text-light": "#1b170d",
+                        "text-dark": "#f3efe7",
+                        "surface-light": "#f3efe7",
+                        "surface-dark": "#1e1e1e",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .message-toast {
+            animation: slideIn 0.3s ease-out;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .message-toast.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .message-toast.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center gap-3 text-text-light dark:text-text-dark mb-4">
+                <div class="size-8 text-primary">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold">Artlion</h1>
+            </a>
+            <h2 class="text-3xl font-black mb-2">로그인</h2>
+            <p class="text-base text-muted-light dark:text-muted-dark">AI 창작의 세계에 오신 것을 환영합니다</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-toast {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="bg-surface-light dark:bg-surface-dark rounded-xl p-8 border border-solid border-gray-200 dark:border-surface-dark">
+            {% csrf_token %}
+
+            <div class="mb-6">
+                <label for="email" class="block text-sm font-medium mb-2">이메일</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="example@email.com"
+                    autocomplete="email"
+                />
+            </div>
+
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium mb-2">비밀번호</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="비밀번호를 입력하세요"
+                    autocomplete="current-password"
+                />
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <label class="flex items-center">
+                    <input type="checkbox" name="remember_me" class="rounded text-primary focus:ring-primary"/>
+                    <span class="ml-2 text-sm">로그인 상태 유지</span>
+                </label>
+                <a href="#" class="text-sm text-primary hover:underline">비밀번호 찾기</a>
+            </div>
+
+            <button type="submit" class="w-full bg-primary text-background-dark font-bold py-3 px-6 rounded-full hover:opacity-90 transition-opacity mb-4">
+                로그인
+            </button>
+
+            <p class="text-center text-sm">
+                계정이 없으신가요? <a href="/register/" class="text-primary font-semibold hover:underline">회원가입</a>
+            </p>
+        </form>
+
+        <div class="mt-8">
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-background-light dark:bg-background-dark text-muted-light dark:text-muted-dark">또는</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'google_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🔍</span>
+                    <span class="font-medium">Google로 로그인</span>
+                </a>
+                <a href="{% url 'github_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-50 dark:hover:bg-surface-dark transition-colors">
+                    <span>🐙</span>
+                    <span class="font-medium">GitHub로 로그인</span>
+                </a>
+                <a href="{% url 'naver_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#03C75A] text-white hover:bg-[#02B350] transition-colors">
+                    <span>🟢</span>
+                    <span class="font-medium">네이버로 로그인</span>
+                </a>
+                <a href="{% url 'kakao_login' %}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-full bg-[#FEE500] text-black hover:bg-[#F5DC00] transition-colors">
+                    <span>💬</span>
+                    <span class="font-medium">카카오로 로그인</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
