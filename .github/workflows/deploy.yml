@@ -18,7 +18,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          cat > backend/.env << EOF
+          cat > .env << EOF
           # Django Settings
           SECRET_KEY=${{ secrets.SECRET_KEY }}
           DEBUG=False

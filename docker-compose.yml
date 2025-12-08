@@ -41,7 +41,7 @@ services:
   # Django Web Application
   web:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: media_platform_web
     restart: unless-stopped
@@ -55,7 +55,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
     env_file:
-      - ./backend/.env
+      - .env
     ports:
       - "8000:8000"
     depends_on:
@@ -87,7 +87,7 @@ services:
   # Celery Worker
   celery_worker:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: media_platform_celery_worker
     restart: unless-stopped
@@ -100,7 +100,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
     env_file:
-      - ./backend/.env
+      - .env
     depends_on:
       db:
         condition: service_healthy
@@ -112,7 +112,7 @@ services:
   # Celery Beat (Scheduler)
   celery_beat:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: media_platform_celery_beat
     restart: unless-stopped
@@ -123,7 +123,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
     env_file:
-      - ./backend/.env
+      - .env
     depends_on:
       db:
         condition: service_healthy
