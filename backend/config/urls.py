@@ -34,6 +34,9 @@ urlpatterns = [
 
     # API v1
     path('api/v1/auth/', include('apps.users.urls')),
+
+    # Common API (Login, Register, Logout)
+    path('api/v1/', include('apps.common.urls')),
 ]
 
 # Debug toolbar (only if installed)
