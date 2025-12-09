@@ -33,6 +33,8 @@ services:
     container_name: ai_image_community_api
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       # 데이터베이스 설정
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ai_image_community}
@@ -48,6 +50,9 @@ services:
       ALLOWED_EXTENSIONS: ${ALLOWED_EXTENSIONS:-["jpg","jpeg","png","gif","webp"]}
 
       # S3 설정 (STORAGE_BACKEND=s3일 때 사용)
+      # 참고: 프로덕션에서는 IAM Role(Instance Profile)을 사용하여 자격 증명을 주입하지 않습니다.
+      #       EC2 인스턴스에 S3 접근 권한이 있는 IAM Role을 연결하면, 컨테이너 내부의 boto3가
+      #       인스턴스 메타데이터(IMDS)를 통해 자동으로 크레덴셜을 가져옵니다.
       AWS_REGION: ${AWS_REGION:-}
       AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
       AWS_S3_PREFIX: ${AWS_S3_PREFIX:-uploads/images}
