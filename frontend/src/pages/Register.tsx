@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import SocialLoginButtons from '../components/SocialLoginButtons';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -170,12 +171,14 @@ const Register: React.FC = () => {
             {loading ? '가입 중...' : '회원가입'}
           </button>
 
-          <p className="text-center text-sm">
+          <p className="text-center text-sm mb-6">
             이미 계정이 있으신가요?{' '}
             <Link to="/login" className="text-primary font-semibold hover:underline">
               로그인
             </Link>
           </p>
+
+          <SocialLoginButtons />
         </form>
       </div>
     </div>

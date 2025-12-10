@@ -7,8 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from django.shortcuts import redirect
+from django.conf import settings
+from allauth.socialaccount.models import SocialApp
 from apps.users.serializers import UserSerializer, UserRegistrationSerializer
 from .serializers import LoginSerializer
+import requests
 
 
 class LoginAPIView(APIView):
@@ -128,3 +132,58 @@ class MeAPIView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SocialLoginAPIView(APIView):
+    """소셜 로그인 리다이렉트 API"""
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="소셜 로그인 시작",
+        description="지정된 소셜 프로바이더로 로그인을 시작합니다.",
+        responses={
+            302: OpenApiResponse(description="OAuth 제공자로 리다이렉트"),
+        }
+    )
+    def get(self, request, provider):
+        """
+        소셜 로그인 시작 엔드포인트
+        provider: google, github, naver, kakao
+        """
+        frontend_url = request.GET.get('redirect_uri', settings.CORS_ALLOWED_ORIGINS[0] if settings.CORS_ALLOWED_ORIGINS else 'http://localhost:3000')
+
+        # Django Allauth의 소셜 로그인 URL로 리다이렉트
+        # state 파라미터로 프론트엔드 URL 전달
+        redirect_url = f'/accounts/{provider}/login/?next=/api/v1/social/callback/{provider}/?frontend={frontend_url}'
+        return redirect(redirect_url)
+
+
+class SocialCallbackAPIView(APIView):
+    """소셜 로그인 콜백 처리 API"""
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="소셜 로그인 콜백",
+        description="OAuth 제공자로부터 콜백을 받아 JWT 토큰을 발급합니다.",
+        responses={
+            302: OpenApiResponse(description="프론트엔드로 토큰과 함께 리다이렉트"),
+        }
+    )
+    def get(self, request, provider):
+        """
+        소셜 로그인 콜백 처리
+        인증 후 JWT 토큰 발급하고 프론트엔드로 리다이렉트
+        """
+        if not request.user.is_authenticated:
+            frontend_url = request.GET.get('frontend', 'http://localhost:3000')
+            return redirect(f'{frontend_url}/login?error=authentication_failed')
+
+        # JWT 토큰 생성
+        user = request.user
+        refresh = RefreshToken.for_user(user)
+
+        # 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
+        frontend_url = request.GET.get('frontend', 'http://localhost:3000')
+        redirect_url = f'{frontend_url}/social-callback?access_token={str(refresh.access_token)}&refresh_token={str(refresh)}'
+
+        return redirect(redirect_url)

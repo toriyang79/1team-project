@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import SocialCallback from './pages/SocialCallback';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -58,6 +59,9 @@ function App() {
               </PublicRoute>
             }
           />
+
+          {/* Social Login Callback */}
+          <Route path="/social-callback" element={<SocialCallback />} />
 
           {/* Protected Routes (예시) */}
           {/* <Route
