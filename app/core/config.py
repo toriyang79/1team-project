@@ -10,6 +10,16 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# ===== CORS 허용 오리진 목록 =====
+CORS_ALLOWED_ORIGINS = [
+    # 개발자 로컬 주소 (테스트용)
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    # 실제 프론트엔드 배포 주소
+    "http://43.200.134.109:5173",
+]
+
+
 class Settings(BaseSettings):
     """애플리케이션 설정"""
 
@@ -54,9 +64,6 @@ class Settings(BaseSettings):
     # ===== 서버 설정 =====
     HOST: str = "0.0.0.0"
     PORT: int = 8000
-
-    # ===== CORS 설정 (선택사항) =====
-    CORS_ORIGINS: str = ""
 
     @field_validator("ALLOWED_EXTENSIONS", mode="before")
     @classmethod

@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.core.config import settings
+from app.core.config import settings, CORS_ALLOWED_ORIGINS
 from app.core.lifespan import lifespan
 
 # ===== FastAPI 앱 생성 =====
@@ -23,25 +23,13 @@ app = FastAPI(
 )
 
 # ===== CORS 설정 =====
-# CORS_ORIGINS를 리스트로 파싱
-cors_origins_list = []
-if settings.CORS_ORIGINS:
-    import json
-    try:
-        # JSON 배열 형식 시도
-        cors_origins_list = json.loads(settings.CORS_ORIGINS)
-    except json.JSONDecodeError:
-        # 콤마 구분 문자열 폴백
-        cors_origins_list = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
-
-if cors_origins_list:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins_list,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ===== 정적 파일 서빙 (업로드된 이미지, 로컬 스토리지일 때만) =====
 import os
