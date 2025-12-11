@@ -26,9 +26,6 @@ app = FastAPI(
 if settings.CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
-        "http://localhost:5174/,"
-        "http://localhost:5173/,"
-        "http://localhost:3000/"],  # 개발 중에는 모든 origin 허용
         allow_origins=settings.CORS_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
