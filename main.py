@@ -23,10 +23,21 @@ app = FastAPI(
 )
 
 # ===== CORS 설정 =====
+# CORS_ORIGINS를 리스트로 파싱
+cors_origins_list = []
 if settings.CORS_ORIGINS:
+    import json
+    try:
+        # JSON 배열 형식 시도
+        cors_origins_list = json.loads(settings.CORS_ORIGINS)
+    except json.JSONDecodeError:
+        # 콤마 구분 문자열 폴백
+        cors_origins_list = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+
+if cors_origins_list:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=cors_origins_list,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

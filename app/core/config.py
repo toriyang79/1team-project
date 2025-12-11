@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # ===== CORS 설정 (선택사항) =====
-    CORS_ORIGINS: List[str] = []
+    CORS_ORIGINS: str = ""
 
     @field_validator("ALLOWED_EXTENSIONS", mode="before")
     @classmethod
@@ -73,25 +73,6 @@ class Settings(BaseSettings):
             except json.JSONDecodeError:
                 # 콤마 구분 문자열 폴백
                 return [ext.strip() for ext in v.split(",")]
-        return v
-
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """
-        CORS 오리진을 파싱합니다.
-
-        환경변수에서 콤마 구분 문자열 또는 JSON 배열을 받아 리스트로 변환합니다.
-        """
-        if isinstance(v, str):
-            if not v:  # 빈 문자열인 경우
-                return []
-            try:
-                # JSON 배열 형식 시도
-                return json.loads(v)
-            except json.JSONDecodeError:
-                # 콤마 구분 문자열 폴백
-                return [origin.strip() for origin in v.split(",")]
         return v
 
     # 하위 호환/별칭 지원: 사용자가 S3_BUCKET_NAME, S3_BASE_URL을 설정했을 경우 매핑
