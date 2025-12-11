@@ -225,3 +225,6 @@ docker-compose.override.yml
 
 # 로그 파일
 logs/
+
+# Claude Code 설정 및 스킬
+.claude/
