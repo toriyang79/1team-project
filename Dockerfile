@@ -20,6 +20,11 @@ FROM python:3.12-slim
 # 작업 디렉토리 설정
 WORKDIR /app
 
+# 런타임에 HTTPS(S3 등) 요청을 위해 CA 인증서 설치
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # 빌드 단계에서 설치한 패키지 복사
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin

@@ -180,6 +180,48 @@ pytest --cov=app --cov-report=html
 - [API_SPEC.md](./.claude/skills/fastapi-image-community/resources/API_SPEC.md) - API 명세
 - [DEPLOYMENT.md](./.claude/skills/fastapi-image-community/resources/DEPLOYMENT.md) - 배포 가이드
 
+## ☁️ EC2에서 S3 업로드가 안 될 때 (IAM Role 사용 권장)
+
+프로덕션 `compose.yaml`은 기본적으로 AWS 액세스 키를 주입하지 않고, EC2 인스턴스의 IAM Role(Instance Profile)을 통해
+컨테이너 내부의 boto3가 자동으로 자격 증명을 가져오도록 설계되어 있습니다. 다음 순서대로 설정하세요.
+
+1) IAM Role 생성 및 권한 부여
+- 콘솔: IAM → Roles → Create role → Trusted entity: EC2
+- 권한 정책: 최소 권한 예시
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject","s3:PutObjectAcl","s3:GetObject","s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::YOUR_S3_BUCKET/*"
+    }
+  ]
+}
+```
+
+2) EC2 인스턴스에 Role 연결
+- EC2 → Instances → 대상 인스턴스 → Actions → Security → Modify IAM role → 위에서 만든 Role 선택
+
+3) 애플리케이션 환경 변수 점검
+- `compose.yaml`의 `fastapi.environment`에 다음 필수 값 설정
+  - `STORAGE_BACKEND=s3`
+  - `AWS_REGION`, `AWS_S3_BUCKET`, (선택) `AWS_S3_PUBLIC_URL`, `AWS_S3_PREFIX`
+- 액세스 키(`AWS_ACCESS_KEY_ID/SECRET`)는 설정하지 않습니다. (IAM Role이 대체)
+
+4) 네트워크/SSL 확인
+- 컨테이너가 인스턴스 메타데이터(169.254.169.254)에 접근 가능해야 합니다(기본 허용).
+- Dockerfile에 `ca-certificates` 설치(본 저장소 반영됨)로 S3 HTTPS 통신 신뢰성 확보.
+
+5) 재배포
+```bash
+docker compose -f compose.yaml up -d --build
+```
+
+문제가 계속되면 S3 버킷 정책/퍼블릭 접근 설정, 그리고 버킷의 Bucket Owner Enforced(ACL 금지) 여부를 확인하세요.
+코드는 ACL 에러가 발생 시 자동으로 ACL 없이 재시도합니다.
+
 ## 🤝 기여
 
 프로젝트에 기여하고 싶으시다면 Pull Request를 보내주세요!
