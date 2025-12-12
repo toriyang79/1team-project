@@ -19,6 +19,10 @@ https://youtu.be/PfsTYSn6KZE
 
 # 프론트 엔드 깃허브 링크
 https://github.com/toriyang79/1team-project-FE/tree/develop
+
+# 개발 일지
+https://cheerful-allium-382.notion.site/20251212-2c7eafdfc3c78024b7badfc70bc14503?source=copy_link
+
 ---
 
 # 김미숙 담당 파트 소개
