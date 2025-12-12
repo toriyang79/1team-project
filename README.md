@@ -14,9 +14,14 @@ ArtLion — 창작을 더 쉽고, 더 자유롭고, 더 강렬하게.
 
 ---
 
+# 시연 영상
+https://youtu.be/PfsTYSn6KZE
 
+# 프론트 엔드 깃허브 링크
+https://github.com/toriyang79/1team-project-FE/tree/develop
+---
 
-# 김미숙 담당 파트
+# 김미숙 담당 파트 소개
 
 # AI Image Community API
 FastAPI 기반의 AI 이미지 커뮤니티 서비스를 담당했습니다.
