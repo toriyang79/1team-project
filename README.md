@@ -142,18 +142,18 @@ docker-compose up --build
 
 
 ### 이미지
-- `POST /api/v1/images/` - 이미지 업로드
-- `GET /api/v1/images/{id}` - 이미지 조회
-- `PUT /api/v1/images/{id}` - 이미지 수정
-- `DELETE /api/v1/images/{id}` - 이미지 삭제
-- `GET /api/v1/images/random` - 랜덤 피드
-- `GET /api/v1/images/top-24h` - 인기 Top 10
+- `POST /api-image/v1/images/` - 이미지 업로드
+- `GET /api-image/v1/images/{id}` - 이미지 조회
+- `PUT /api-image/v1/images/{id}` - 이미지 수정
+- `DELETE /api-image/v1/images/{id}` - 이미지 삭제
+- `GET /api-image/v1/images/random` - 랜덤 피드
+- `GET /api-image/v1/images/top-24h` - 인기 Top 10
 
 ### 좋아요
-- `POST /api/v1/images/{id}/like` - 좋아요 추가
-- `DELETE /api/v1/images/{id}/like` - 좋아요 취소
+- `POST /api-image/v1/images/{id}/like` - 좋아요 추가
+- `DELETE /api-image/v1/images/{id}/like` - 좋아요 취소
 
 ### 토너먼트
-- `GET /api/v1/tournaments/match` - 랜덤 매치업
-- `POST /api/v1/tournaments/vote` - 투표
+- `GET /api-image/v1/tournaments/match` - 랜덤 매치업
+- `POST /api-image/v1/tournaments/vote` - 투표
 

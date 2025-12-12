@@ -26,7 +26,7 @@ router = APIRouter(prefix="/images", tags=["Images"])
     AI로 생성한 이미지를 업로드합니다.
 
     ## 최종 경로
-    `POST /api/v1/images/`
+    `POST /api-image/v1/images/`
 
     ## 요청 조건
     - **인증 필수**: JWT 토큰이 Authorization 헤더에 포함되어야 합니다
@@ -84,7 +84,7 @@ async def create_image(
     이미지 목록을 조회합니다.
 
     ## 최종 경로
-    `GET /api/v1/images/`
+    `GET /api-image/v1/images/`
 
     ## 쿼리 파라미터
     - page: 페이지 번호 (기본값: 1)
@@ -118,7 +118,7 @@ async def get_images(
     특정 이미지의 상세 정보를 조회합니다.
 
     ## 최종 경로
-    `GET /api/v1/images/{image_id}`
+    `GET /api-image/v1/images/{image_id}`
     """,
 )
 async def get_image(
@@ -148,7 +148,7 @@ async def get_image(
     이미지 메타데이터를 수정합니다.
 
     ## 최종 경로
-    `PUT /api/v1/images/{image_id}`
+    `PUT /api-image/v1/images/{image_id}`
 
     ## 요청 조건
     - **인증 필수**: 자신의 이미지만 수정 가능
@@ -184,7 +184,7 @@ async def update_image(
     이미지를 삭제합니다 (Soft Delete).
 
     ## 최종 경로
-    `DELETE /api/v1/images/{image_id}`
+    `DELETE /api-image/v1/images/{image_id}`
 
     ## 요청 조건
     - **인증 필수**: 자신의 이미지만 삭제 가능
@@ -213,7 +213,7 @@ async def delete_image(
     랜덤하게 이미지를 조회합니다.
 
     ## 최종 경로
-    `GET /api/v1/images/feed/random`
+    `GET /api-image/v1/images/feed/random`
 
     ## 쿼리 파라미터
     - limit: 조회할 이미지 개수 (기본값: 20, 최대: 50)
@@ -243,7 +243,7 @@ async def get_random_feed(
     최근 24시간 내 좋아요가 많은 이미지를 조회합니다.
 
     ## 최종 경로
-    `GET /api/v1/images/feed/top-24h`
+    `GET /api-image/v1/images/feed/top-24h`
 
     ## 쿼리 파라미터
     - limit: 조회할 이미지 개수 (기본값: 10, 최대: 50)

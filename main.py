@@ -50,7 +50,7 @@ if settings.STORAGE_BACKEND.lower() == "local":
 
 # ===== 라우터 등록 =====
 from app.api.v1.router import api_v1_router
-app.include_router(api_v1_router, prefix="/api/v1")
+app.include_router(api_v1_router, prefix="/api-image/v1")
 
 
 # ===== 헬스 체크 엔드포인트 =====

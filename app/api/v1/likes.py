@@ -24,7 +24,7 @@ router = APIRouter(prefix="/images", tags=["Likes"])
     이미지에 좋아요를 추가합니다.
 
     ## 최종 경로
-    `POST /api/v1/images/{image_id}/like`
+    `POST /api-image/v1/images/{image_id}/like`
 
     ## 요청 조건
     - **인증 필수**: JWT 토큰이 Authorization 헤더에 포함되어야 합니다
@@ -68,7 +68,7 @@ async def add_like(
     이미지의 좋아요를 취소합니다.
 
     ## 최종 경로
-    `DELETE /api/v1/images/{image_id}/like`
+    `DELETE /api-image/v1/images/{image_id}/like`
 
     ## 요청 조건
     - **인증 필수**: JWT 토큰이 Authorization 헤더에 포함되어야 합니다
@@ -110,7 +110,7 @@ async def remove_like(
     사용자가 해당 이미지에 좋아요를 눌렀는지 확인합니다.
 
     ## 최종 경로
-    `GET /api/v1/images/{image_id}/like/status`
+    `GET /api-image/v1/images/{image_id}/like/status`
 
     ## 요청 조건
     - **인증 필수**: JWT 토큰이 Authorization 헤더에 포함되어야 합니다

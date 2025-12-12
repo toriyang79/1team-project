@@ -30,7 +30,7 @@ router = APIRouter(prefix="/tournaments", tags=["Tournaments"])
     토너먼트를 위한 랜덤 이미지 2개를 매칭합니다.
 
     ## 최종 경로
-    `GET /api/v1/tournaments/match`
+    `GET /api-image/v1/tournaments/match`
 
     ## 조건
     - is_tournament_opt_in=true인 이미지만 선택됩니다
@@ -66,7 +66,7 @@ async def get_tournament_match(
     토너먼트에서 승자를 선택하여 투표합니다.
 
     ## 최종 경로
-    `POST /api/v1/tournaments/vote`
+    `POST /api-image/v1/tournaments/vote`
 
     ## 요청 조건
     - **인증 필수**: JWT 토큰이 Authorization 헤더에 포함되어야 합니다
@@ -114,7 +114,7 @@ async def vote_tournament(
     토너먼트 승리 횟수 기준 랭킹을 조회합니다.
 
     ## 최종 경로
-    `GET /api/v1/tournaments/rankings`
+    `GET /api-image/v1/tournaments/rankings`
 
     ## 쿼리 파라미터
     - limit: 조회할 랭킹 개수 (기본값: 50, 최대: 100)
